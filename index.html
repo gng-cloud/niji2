@@ -42,10 +42,25 @@
             font-family: 'Inter', sans-serif;
             scroll-behavior: smooth;
             min-height: max(884px, 100dvh);
+            overflow-x: hidden;
         }
 
         .zen-gradient {
             background: linear-gradient(to bottom, rgba(246, 246, 248, 0) 0%, rgba(246, 246, 248, 1) 100%);
+        }
+
+        #mobile-menu {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        #mobile-menu.hidden {
+            transform: translateX(100%);
+            display: none;
+        }
+
+        #mobile-menu.active {
+            transform: translateX(0);
+            display: flex;
         }
     </style>
 </head>
@@ -67,9 +82,31 @@
                 <a class="px-6 py-2 border border-primary text-primary hover:bg-primary hover:text-slate-900 transition-all rounded"
                     href="#contact">Nous Rejoindre</a>
             </div>
-            <button class="md:hidden text-slate-900">
-                <span class="material-symbols-outlined">menu</span>
+            <button id="menu-toggle" class="md:hidden text-slate-900 p-2">
+                <span class="material-symbols-outlined text-3xl">menu</span>
             </button>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div id="mobile-menu" class="hidden fixed inset-0 z-[60] bg-background-light flex-col p-8 md:hidden">
+            <div class="flex justify-between items-center mb-12">
+                <div class="flex items-center gap-3">
+                    <img src="images/logo.png" alt="Niji Kendoka Logo" class="h-8 w-auto">
+                    <span class="font-display font-bold tracking-widest uppercase text-sm">Niji Kendoka</span>
+                </div>
+                <button id="menu-close" class="text-slate-900">
+                    <span class="material-symbols-outlined text-3xl">close</span>
+                </button>
+            </div>
+            <div class="flex flex-col gap-8 text-lg font-medium tracking-[0.2em] uppercase">
+                <a class="mobile-link" href="#esprit">L'Esprit</a>
+                <a class="mobile-link" href="#kendo">Le Kendo</a>
+                <a class="mobile-link" href="#enseignants">Enseignants</a>
+                <a class="mobile-link" href="#pratique">Pratique</a>
+                <a class="mobile-link" href="#acces">Accès</a>
+                <a class="mobile-link mt-4 px-6 py-4 bg-primary text-slate-900 text-center rounded font-bold"
+                    href="#contact">Nous Rejoindre</a>
+            </div>
         </div>
     </nav>
 
@@ -553,12 +590,52 @@
     </footer>
 
     <script>
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuToggle = document.getElementById('menu-toggle');
+            const menuClose = document.getElementById('menu-close');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileLinks = document.querySelectorAll('.mobile-link');
+
+            function toggleMenu() {
+                const isHidden = mobileMenu.classList.contains('hidden');
+                if (isHidden) {
+                    mobileMenu.classList.remove('hidden');
+                    setTimeout(() => mobileMenu.classList.add('active'), 10);
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    mobileMenu.classList.remove('active');
+                    setTimeout(() => mobileMenu.classList.add('hidden'), 300);
+                    document.body.style.overflow = '';
+                }
+            }
+
+            menuToggle.addEventListener('click', toggleMenu);
+            menuClose.addEventListener('click', toggleMenu);
+
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.remove('active');
+                    setTimeout(() => mobileMenu.classList.add('hidden'), 300);
+                    document.body.style.overflow = '';
+                });
+            });
+
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+
+                    if (targetElement) {
+                        e.preventDefault();
+                        const navHeight = 80; // height of the navbar
+                        const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - navHeight;
+
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
                 });
             });
         });
